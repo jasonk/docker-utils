@@ -1,0 +1,30 @@
+#!/bin/bash
+# waitlinks - delay boot until all docker linked containers are functional
+# 2014 Jason Kohles <email@jasonkohles.com>
+# http://github.com/jasonk/docker-utils/README.waitlinks.md
+
+# Docker links variables look like this:
+export DB_PORT=tcp://172.17.0.8:6379
+export DB_PORT_6379_TCP=tcp://172.17.0.8:6379
+export DB_PORT_6379_TCP_PROTO=tcp
+export DB_PORT_6379_TCP_ADDR=172.17.0.8
+export DB_PORT_6379_TCP_PORT=6379
+
+while true; do
+    WAITING=()
+    for I in "$(env | grep _PORT= | grep '://' )"; do
+        NAME="${I%_PORT=*}"
+        ADDR="${I#*=}"
+        DEV="/dev/$(echo "$ADDR" | tr -s '/:' '/')"
+        echo "NAME=$NAME ADDR=$ADDR DEV=$DEV"
+        : < $DEV
+        if [ $? -ne 0 ]; then
+            WAITING+=( $NAME )
+        fi
+    done
+    if [ ${#WAITING[@]} -gt 0 ]; then
+        echo "Waiting for links: ${WAITING[@]}"
+    else
+        break;
+    fi
+done

@@ -1,0 +1,78 @@
+#!/bin/bash
+# template - easily fill configuration templates
+# 2014 Jason Kohles <email@jasonkohles.com>
+# http://github.com/jasonk/docker-utils/README.template.md
+
+DIR="$(\cd "$(\dirname "$0")/..">/dev/null && \pwd)"
+
+#TMPL="${1:?Must specify the template to fill}"
+
+TEMPLATE=""
+TARGET=""
+VERBOSE=false
+ONCE=false
+
+function info() {
+    if [ "$VERBOSE" = "true" ]; then
+        echo "$@"
+    fi
+}
+
+function usage() {
+    (
+        echo "Usage: template [options] <filename.tmpl> <target-file>"
+        echo "  Options:"
+        echo "    --once    Don't recompile if the target already exists"
+        echo "    --verbose Provide some debugging info while running"
+        echo ""
+        echo "If only one of the two file arguments is provided, template"
+        echo "will attempt to infer the other argument.  For example, if you"
+        echo "run it with just '/etc/hosts.tmpl' as the template, then it"
+        echo "will assume that the target is '/etc/hosts' (which it infers"
+        echo "by just removing the '.tmpl' extension..  If you just give"
+        echo "it a target (which doesn't already have a .tmpl extension"
+        echo "then it will assume the template is just the target with"
+        echo ".tmpl appended."
+    ) 1>&2
+    exit 1
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --once) ONCE=true       ; shift ;;
+        --verbose) VERBOSE=true ; shift ;;
+        *.tmpl) TEMPLATE="$1"   ; shift ;;
+        [a-z]*) TARGET="$1"     ; shift ;;
+        *) usage ;;
+    esac
+done
+
+if [ -z "$TARGET" -a -n "$TEMPLATE" ]; then
+    TARGET="${TEMPLATE%.tmpl}"
+fi
+if [ -z "$TEMPLATE" -a -n "$TARGET" ]; then
+    TEMPLATE="$TARGET.tmpl"
+fi
+
+if [ "$ONCE" == "true" ]; then
+    if [ -f "$TARGET" ]; then exit 0; fi
+fi
+
+echo "TEMPLATE=$TEMPLATE"
+echo "TARGET=$TARGET"
+echo "ONCE=$ONCE"
+
+
+exit;
+if [ -n "$2" ]; then
+    TARGET="$2"
+else
+    TARGET="${TMPL%.tmpl}"
+fi
+
+echo "Filling template $TEMPLATE into $TARGET"
+
+if [ ! -f "$TMPL" ]; then
+    echo "Template '$TEMPLATE' does not exist" 1>&2
+    exit 1
+fi
