@@ -4,11 +4,11 @@
 # http://github.com/jasonk/docker-utils/README.waitlinks.md
 
 # Docker links variables look like this:
-export DB_PORT=tcp://172.17.0.8:6379
-export DB_PORT_6379_TCP=tcp://172.17.0.8:6379
-export DB_PORT_6379_TCP_PROTO=tcp
-export DB_PORT_6379_TCP_ADDR=172.17.0.8
-export DB_PORT_6379_TCP_PORT=6379
+# export DB_PORT=tcp://172.17.0.8:6379
+# export DB_PORT_6379_TCP=tcp://172.17.0.8:6379
+# export DB_PORT_6379_TCP_PROTO=tcp
+# export DB_PORT_6379_TCP_ADDR=172.17.0.8
+# export DB_PORT_6379_TCP_PORT=6379
 
 while true; do
     WAITING=()
