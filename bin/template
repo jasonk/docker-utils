@@ -20,7 +20,7 @@ function info() {
 
 function usage() {
     (
-        echo "Usage: template [options] <filename.tmpl> <target-file>"
+        echo "Usage: template [options] <filename.tmpl> [target-file]"
         echo "  Options:"
         echo "    --once    Don't recompile if the target already exists"
         echo "    --verbose Provide some debugging info while running"
@@ -42,7 +42,7 @@ while [ $# -gt 0 ]; do
         --once) ONCE=true       ; shift ;;
         --verbose) VERBOSE=true ; shift ;;
         *.tmpl) TEMPLATE="$1"   ; shift ;;
-        [a-z]*) TARGET="$1"     ; shift ;;
+        *[a-z]*) TARGET="$1"    ; shift ;;
         *) usage ;;
     esac
 done
@@ -58,12 +58,6 @@ if [ "$ONCE" == "true" ]; then
     if [ -f "$TARGET" ]; then exit 0; fi
 fi
 
-echo "TEMPLATE=$TEMPLATE"
-echo "TARGET=$TARGET"
-echo "ONCE=$ONCE"
-
-
-exit;
 if [ -n "$2" ]; then
     TARGET="$2"
 else
@@ -72,7 +66,24 @@ fi
 
 echo "Filling template $TEMPLATE into $TARGET"
 
-if [ ! -f "$TMPL" ]; then
+if [ ! -f "$TEMPLATE" ]; then
     echo "Template '$TEMPLATE' does not exist" 1>&2
     exit 1
 fi
+
+#CONTENT="$(cat "$TEMPLATE")"
+#
+#cat <<END_OF_TEMPLATE
+#$CONTENT
+#END_OF_TEMPLATE
+
+while read -r line ; do
+    while [[ "$line" =~ (\{\{(.*?)\}\}) ]]; do
+        LHS=${BASH_REMATCH[1]}
+        VAL=${BASH_REMATCH[2]}
+        echo "LHS=$LHS VAL=$VAL"
+        RHS="$(eval echo "\"$LHS\"")"
+        line=${line//$LHS/$RHS}
+    done
+    echo -e "\e[00;34m$line\e[00m"
+done < "$TEMPLATE"
